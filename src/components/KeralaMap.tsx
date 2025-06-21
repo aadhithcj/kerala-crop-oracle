@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -235,7 +234,7 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span>Low (<60%)</span>
+            <span>Low (&lt;60%)</span>
           </div>
         </div>
       </Card>
