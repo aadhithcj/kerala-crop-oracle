@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import KeralaMap from './KeralaMap';
 import LocationSearch from './LocationSearch';
@@ -83,9 +82,10 @@ const Dashboard: React.FC = () => {
         </p>
       </div>
 
-      {/* Search and Weather Section */}
+      {/* Search, Weather, and Map Section */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        {/* Left: Search & Map (span 2 columns) */}
+        <div className="lg:col-span-2 space-y-6">
           <Card className="p-6 bg-white/80 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex-1">
@@ -103,16 +103,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </Card>
-        </div>
-        
-        <div>
-          <WeatherWidget location={selectedLocation?.name || "Kerala"} />
-        </div>
-      </div>
 
-      {/* Map Section */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
           <Card className="p-6 bg-white/80 backdrop-blur-sm">
             <h2 className="text-xl font-semibold text-forest-800 mb-4">
               Interactive Kerala Map
@@ -126,8 +117,10 @@ const Dashboard: React.FC = () => {
             </div>
           </Card>
         </div>
-        
-        <div className="flex items-start">
+
+        {/* Right: Weather and Map Insights */}
+        <div className="space-y-6 flex flex-col">
+          <WeatherWidget location={selectedLocation?.name || "Kerala"} />
           <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 w-full">
             <div className="text-center">
               <MapPin className="h-8 w-8 text-forest-600 mx-auto mb-2" />
