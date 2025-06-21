@@ -142,9 +142,9 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
     onLocationSelect(locationData);
   };
 
-  const getYieldColor = (yield: number) => {
-    if (yield >= 80) return '#10b981'; // green
-    if (yield >= 60) return '#f59e0b'; // yellow
+  const getYieldColor = (yieldValue: number) => {
+    if (yieldValue >= 80) return '#10b981'; // green
+    if (yieldValue >= 60) return '#f59e0b'; // yellow
     return '#ef4444'; // red
   };
 
