@@ -111,18 +111,49 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Map Section */}
-      <Card className="p-6 bg-white/80 backdrop-blur-sm">
-        <h2 className="text-xl font-semibold text-forest-800 mb-4">
-          Interactive Kerala Map
-        </h2>
-        <KeralaMap 
-          onLocationSelect={handleLocationSelect}
-          selectedLocation={selectedLocation}
-        />
-        <div className="mt-4 text-sm text-forest-600 bg-earth-50 p-3 rounded-lg">
-          <p>💡 <strong>How to use:</strong> Click on any marker for quick insights, or click anywhere on the map to analyze that specific location using our AI model.</p>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card className="p-6 bg-white/80 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold text-forest-800 mb-4">
+              Interactive Kerala Map
+            </h2>
+            <KeralaMap 
+              onLocationSelect={handleLocationSelect}
+              selectedLocation={selectedLocation}
+            />
+            <div className="mt-4 text-sm text-forest-600 bg-earth-50 p-3 rounded-lg">
+              <p>💡 <strong>How to use:</strong> Click on any marker for quick insights, or click anywhere on the map to analyze that specific location using our AI model.</p>
+            </div>
+          </Card>
         </div>
-      </Card>
+        
+        <div className="flex items-start">
+          <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 w-full">
+            <div className="text-center">
+              <MapPin className="h-8 w-8 text-forest-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-forest-800 mb-2">Map Insights</h3>
+              <p className="text-sm text-forest-600 mb-4">
+                {selectedLocation 
+                  ? `Analyzing ${selectedLocation.name}` 
+                  : "Select a location to view detailed insights"
+                }
+              </p>
+              {selectedLocation && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Best Crop:</span>
+                    <span className="font-medium">{selectedLocation.bestCrop}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Yield Potential:</span>
+                    <span className="font-medium">{selectedLocation.yieldPotential.toFixed(0)}%</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
 
       {/* Quick Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
