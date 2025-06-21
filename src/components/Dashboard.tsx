@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import KeralaMap from './KeralaMap';
 import LocationSearch from './LocationSearch';
@@ -53,10 +52,10 @@ const Dashboard: React.FC = () => {
     }, 1500);
   };
 
-  const getYieldStatus = (yield: number) => {
-    if (yield >= 80) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' };
-    if (yield >= 65) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' };
-    if (yield >= 50) return { label: 'Fair', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
+  const getYieldStatus = (yieldValue: number) => {
+    if (yieldValue >= 80) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' };
+    if (yieldValue >= 65) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' };
+    if (yieldValue >= 50) return { label: 'Fair', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
     return { label: 'Poor', color: 'bg-red-500', textColor: 'text-red-700' };
   };
 
