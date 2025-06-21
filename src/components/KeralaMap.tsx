@@ -1,16 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+  ZoomControl
+} from 'react-leaflet';
 import L from 'leaflet';
 import { MapPin, TrendingUp, Droplets, Thermometer, Leaf } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import 'leaflet/dist/leaflet.css';
+import './KeralaMap.css'; // For zoom button styles if needed
 
-// Fix for default markers in React Leaflet
+// Fix marker icons in React Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconRetinaUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
 });
 
 interface LocationData {
@@ -31,16 +44,16 @@ interface KeralaMapProps {
   selectedLocation?: LocationData | null;
 }
 
-// Sample data for Kerala districts
+// Sample data
 const sampleLocations: LocationData[] = [
   {
     lat: 11.2588,
     lng: 75.7804,
-    name: "Kozhikode",
-    district: "Kozhikode",
-    bestCrop: "Coconut",
+    name: 'Kozhikode',
+    district: 'Kozhikode',
+    bestCrop: 'Coconut',
     yieldPotential: 85,
-    soilType: "Laterite",
+    soilType: 'Laterite',
     temperature: 28,
     rainfall: 2500,
     confidence: 92
@@ -48,11 +61,11 @@ const sampleLocations: LocationData[] = [
   {
     lat: 9.9312,
     lng: 76.2673,
-    name: "Kochi",
-    district: "Ernakulam",
-    bestCrop: "Rice",
+    name: 'Kochi',
+    district: 'Ernakulam',
+    bestCrop: 'Rice',
     yieldPotential: 78,
-    soilType: "Alluvial",
+    soilType: 'Alluvial',
     temperature: 29,
     rainfall: 3000,
     confidence: 88
@@ -60,11 +73,11 @@ const sampleLocations: LocationData[] = [
   {
     lat: 8.5241,
     lng: 76.9366,
-    name: "Thiruvananthapuram",
-    district: "Thiruvananthapuram",
-    bestCrop: "Banana",
+    name: 'Thiruvananthapuram',
+    district: 'Thiruvananthapuram',
+    bestCrop: 'Banana',
     yieldPotential: 82,
-    soilType: "Red Soil",
+    soilType: 'Red Soil',
     temperature: 27,
     rainfall: 1800,
     confidence: 90
@@ -72,11 +85,11 @@ const sampleLocations: LocationData[] = [
   {
     lat: 10.8505,
     lng: 76.2711,
-    name: "Thrissur",
-    district: "Thrissur",
-    bestCrop: "Pepper",
+    name: 'Thrissur',
+    district: 'Thrissur',
+    bestCrop: 'Pepper',
     yieldPotential: 75,
-    soilType: "Laterite",
+    soilType: 'Laterite',
     temperature: 28,
     rainfall: 2800,
     confidence: 85
@@ -84,11 +97,11 @@ const sampleLocations: LocationData[] = [
   {
     lat: 12.2958,
     lng: 75.7139,
-    name: "Kannur",
-    district: "Kannur",
-    bestCrop: "Cashew",
+    name: 'Kannur',
+    district: 'Kannur',
+    bestCrop: 'Cashew',
     yieldPotential: 88,
-    soilType: "Coastal Alluvium",
+    soilType: 'Coastal Alluvium',
     temperature: 29,
     rainfall: 3200,
     confidence: 94
@@ -99,52 +112,55 @@ const MapEvents = ({ onMapClick }: { onMapClick: (lat: number, lng: number) => v
   useMapEvents({
     click: (e) => {
       onMapClick(e.latlng.lat, e.latlng.lng);
-    },
+    }
   });
   return null;
 };
 
-const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocation }) => {
-  const [clickedLocation, setClickedLocation] = useState<{lat: number, lng: number} | null>(null);
-
-  // Kerala center coordinates
+const KeralaMap = forwardRef(({ onLocationSelect, selectedLocation }: KeralaMapProps, ref) => {
+  const [clickedLocation, setClickedLocation] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
   const keralaCenter: [number, number] = [10.8505, 76.2711];
+  const mapRef = useRef<any>(null);
+
+  useImperativeHandle(ref, () => ({
+    flyTo: (coords: [number, number], zoom = 10, options = {}) => {
+      if (mapRef.current) {
+        mapRef.current.flyTo(coords, zoom, options);
+      }
+    }
+  }));
+
+  const FlyToSetter = () => {
+    const map = useMap();
+    mapRef.current = map;
+    return null;
+  };
 
   const handleMapClick = (lat: number, lng: number) => {
     setClickedLocation({ lat, lng });
-    
-    // Find nearest location or create a mock one
-    const nearestLocation = sampleLocations.reduce((nearest, location) => {
-      const distance = Math.sqrt(
-        Math.pow(location.lat - lat, 2) + Math.pow(location.lng - lng, 2)
-      );
-      const nearestDistance = Math.sqrt(
-        Math.pow(nearest.lat - lat, 2) + Math.pow(nearest.lng - lng, 2)
-      );
-      return distance < nearestDistance ? location : nearest;
+
+    const nearest = sampleLocations.reduce((a, b) => {
+      const da = Math.hypot(a.lat - lat, a.lng - lng);
+      const db = Math.hypot(b.lat - lat, b.lng - lng);
+      return da < db ? a : b;
     });
 
-    // Create location data for clicked point
     const locationData: LocationData = {
       lat,
       lng,
       name: `Location ${lat.toFixed(3)}, ${lng.toFixed(3)}`,
-      district: nearestLocation.district,
-      bestCrop: nearestLocation.bestCrop,
-      yieldPotential: Math.max(50, nearestLocation.yieldPotential + (Math.random() - 0.5) * 20),
-      soilType: nearestLocation.soilType,
-      temperature: nearestLocation.temperature + (Math.random() - 0.5) * 4,
-      rainfall: nearestLocation.rainfall + (Math.random() - 0.5) * 500,
+      district: nearest.district,
+      bestCrop: nearest.bestCrop,
+      yieldPotential: Math.max(50, nearest.yieldPotential + (Math.random() - 0.5) * 20),
+      soilType: nearest.soilType,
+      temperature: nearest.temperature + (Math.random() - 0.5) * 4,
+      rainfall: nearest.rainfall + (Math.random() - 0.5) * 500,
       confidence: Math.max(60, 95 - Math.random() * 25)
     };
 
     onLocationSelect(locationData);
-  };
-
-  const getYieldColor = (yieldValue: number) => {
-    if (yieldValue >= 80) return '#10b981'; // green
-    if (yieldValue >= 60) return '#f59e0b'; // yellow
-    return '#ef4444'; // red
   };
 
   return (
@@ -152,23 +168,24 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
       <MapContainer
         center={keralaCenter}
         zoom={8}
+        scrollWheelZoom={false} // ✅ disables scroll zoom
+        zoomControl={false} // manually adding ZoomControl below
         style={{ height: '100%', width: '100%' }}
-        className="z-0"
       >
+        <FlyToSetter />
+        <ZoomControl position="bottomright" /> {/* ✅ repositioned zoom buttons */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
         <MapEvents onMapClick={handleMapClick} />
 
-        {/* Sample location markers */}
         {sampleLocations.map((location, index) => (
           <Marker
             key={index}
             position={[location.lat, location.lng]}
             eventHandlers={{
-              click: () => onLocationSelect(location),
+              click: () => onLocationSelect(location)
             }}
           >
             <Popup>
@@ -192,8 +209,8 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
                     <span>{location.rainfall}mm</span>
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="w-full mt-2 bg-forest-500 hover:bg-forest-600"
                   onClick={() => onLocationSelect(location)}
                 >
@@ -204,14 +221,14 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
           </Marker>
         ))}
 
-        {/* Clicked location marker */}
         {clickedLocation && (
           <Marker position={[clickedLocation.lat, clickedLocation.lng]}>
             <Popup>
               <div className="p-2">
                 <p className="font-medium">Analyzing location...</p>
                 <p className="text-sm text-gray-600">
-                  Lat: {clickedLocation.lat.toFixed(4)}<br/>
+                  Lat: {clickedLocation.lat.toFixed(4)}
+                  <br />
                   Lng: {clickedLocation.lng.toFixed(4)}
                 </p>
               </div>
@@ -220,7 +237,7 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
         )}
       </MapContainer>
 
-      {/* Map Legend */}
+      {/* Legend Box */}
       <Card className="absolute bottom-4 left-4 z-[1000] p-3 bg-white/90 backdrop-blur-sm">
         <h4 className="font-medium text-sm mb-2">Yield Potential</h4>
         <div className="space-y-1 text-xs">
@@ -240,6 +257,6 @@ const KeralaMap: React.FC<KeralaMapProps> = ({ onLocationSelect, selectedLocatio
       </Card>
     </div>
   );
-};
+});
 
 export default KeralaMap;

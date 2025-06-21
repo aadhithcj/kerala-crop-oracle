@@ -1,0 +1,62 @@
+/* src/components/KeralaMap.css */
+
+/* Force reset any default Leaflet zoom bar behavior */
+.leaflet-control-zoom,
+.leaflet-control-zoom.leaflet-bar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The actual buttons (+ and -) */
+.leaflet-control-zoom a,
+.leaflet-control-zoom a.leaflet-control-zoom-in,
+.leaflet-control-zoom a.leaflet-control-zoom-out {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 50% !important;
+  background-color: #ffffffdd !important;
+  color: #065f46 !important; /* emerald-800 */
+  font-size: 2.8rem !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  border: 2px solid #e5e7eb !important; /* gray-200 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s, color 0.2s !important;
+  text-decoration: none !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Hover: just color change */
+.leaflet-control-zoom a:hover,
+.leaflet-control-zoom a.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom a.leaflet-control-zoom-out:hover {
+  background-color: #ecfdf5 !important; /* emerald-50 */
+  color: #047857 !important;            /* emerald-700 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Remove any outline or box on click */
+.leaflet-control-zoom a:focus,
+.leaflet-control-zoom a.leaflet-control-zoom-in:focus,
+.leaflet-control-zoom a.leaflet-control-zoom-out:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px #a7f3d0, 0 2px 8px rgba(0, 0, 0, 0.1) !important; /* emerald-200 glow */
+}
+
+/* Ensure the text is perfectly centered */
+.leaflet-control-zoom a span,
+.leaflet-control-zoom a.leaflet-control-zoom-in span,
+.leaflet-control-zoom a.leaflet-control-zoom-out span {
+  display: block !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}

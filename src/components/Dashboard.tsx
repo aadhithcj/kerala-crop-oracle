@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import KeralaMap from './KeralaMap';
 import LocationSearch from './LocationSearch';
 import WeatherWidget from './WeatherWidget';
@@ -6,7 +6,9 @@ import LocationDetailsDrawer from './LocationDetailsDrawer';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Leaf, Droplets, Thermometer, MapPin, AlertCircle } from 'lucide-react';
+import {
+  TrendingUp, Leaf, Droplets, Thermometer, MapPin, Sparkles
+} from 'lucide-react';
 
 interface LocationData {
   lat: number;
@@ -25,215 +27,157 @@ const Dashboard: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeQuickLocation, setActiveQuickLocation] = useState<string | null>(null);
+
+  const mapRef = useRef<any>(null);
+
+  const locationCoordinates: Record<string, any> = {
+    Kochi: { lat: 9.9312, lng: 76.2673, district: 'Ernakulam', name: 'Kochi' },
+    Thiruvananthapuram: { lat: 8.5241, lng: 76.9366, district: 'Thiruvananthapuram', name: 'Thiruvananthapuram' },
+    Munnar: { lat: 10.0889, lng: 77.0595, district: 'Idukki', name: 'Munnar' }
+  };
 
   const handleLocationSelect = (location: any) => {
     setIsAnalyzing(true);
-
-    // Simulate API processing time
     setTimeout(() => {
-      if ('bestCrop' in location) {
-        // Map click with full data
-        setSelectedLocation(location);
-      } else {
-        // Search result - create enriched data
-        const enrichedLocation: LocationData = {
-          lat: location.lat,
-          lng: location.lng,
-          name: location.name,
-          district: location.district,
-          bestCrop: ['Rice', 'Coconut', 'Banana', 'Pepper', 'Cardamom'][Math.floor(Math.random() * 5)],
-          yieldPotential: 65 + Math.random() * 30,
-          soilType: ['Laterite', 'Alluvial', 'Red Soil', 'Black Soil'][Math.floor(Math.random() * 4)],
-          temperature: 26 + Math.random() * 6,
-          rainfall: 1500 + Math.random() * 2000,
-          confidence: 75 + Math.random() * 20
-        };
-        setSelectedLocation(enrichedLocation);
+      const enrichedLocation: LocationData = {
+        lat: location.lat,
+        lng: location.lng,
+        name: location.name,
+        district: location.district,
+        bestCrop: ['Rice', 'Coconut', 'Banana', 'Pepper', 'Cardamom'][Math.floor(Math.random() * 5)],
+        yieldPotential: 65 + Math.random() * 30,
+        soilType: ['Laterite', 'Alluvial', 'Red Soil', 'Black Soil'][Math.floor(Math.random() * 4)],
+        temperature: 26 + Math.random() * 6,
+        rainfall: 1500 + Math.random() * 2000,
+        confidence: 75 + Math.random() * 20
+      };
+      setSelectedLocation(enrichedLocation);
+
+      if (mapRef.current) {
+        mapRef.current.flyTo([location.lat, location.lng], 10, { duration: 1.5 });
       }
+
       setIsAnalyzing(false);
-      // Remove or comment out the next line:
-      // setIsDrawerOpen(true);
-    }, 1500);
+    }, 1200);
   };
 
-  const getYieldStatus = (yieldValue: number) => {
-    if (yieldValue >= 80) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700' };
-    if (yieldValue >= 65) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700' };
-    if (yieldValue >= 50) return { label: 'Fair', color: 'bg-yellow-500', textColor: 'text-yellow-700' };
-    return { label: 'Poor', color: 'bg-red-500', textColor: 'text-red-700' };
-  };
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 90) return 'text-green-600';
-    if (confidence >= 70) return 'text-blue-600';
-    if (confidence >= 50) return 'text-yellow-600';
-    return 'text-red-600';
+  const handleQuickLocationClick = (loc: string) => {
+    setActiveQuickLocation(loc);
+    handleLocationSelect(locationCoordinates[loc]);
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header Section */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold font-poppins text-forest-800">
           Kerala Agricultural Intelligence Dashboard
         </h1>
         <p className="text-forest-600 max-w-2xl mx-auto">
-          Discover optimal crops for any location in Kerala using AI-powered analysis of weather patterns, 
+          Discover optimal crops for any location in Kerala using AI-powered analysis of weather patterns,
           soil conditions, and historical yield data.
         </p>
       </div>
 
-      {/* Search, Weather, and Map Section */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left: Search & Map (span 2 columns) */}
+        {/* Left Panel */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="p-6 bg-white/80 backdrop-blur-sm">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-forest-800 mb-2">
-                  Search & Explore Locations
-                </h2>
-                <LocationSearch 
-                  onLocationSelect={handleLocationSelect}
-                  placeholder="Search for cities, districts, or villages in Kerala..."
-                />
-              </div>
-              <div className="text-sm text-forest-600 bg-forest-50 p-3 rounded-lg border border-forest-200">
-                <p className="font-medium mb-1">Quick Tip:</p>
-                <p>Click anywhere on the map or search for a specific location to get instant crop recommendations!</p>
-              </div>
-            </div>
-          </Card>
+          <Card className="relative overflow-hidden p-6 bg-gradient-to-br from-white via-blue-40 to-green-100 rounded-xl shadow-md backdrop-blur-sm border border-white/50 space-y-6">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-emerald-100/40 to-blue-100/40 rounded-full -translate-y-10 translate-x-10" />
+            <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-green-100/30 to-emerald-100/30 rounded-full translate-y-8 -translate-x-8" />
 
-          <Card className="p-6 bg-white/80 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold text-forest-800 mb-4">
-              Interactive Kerala Map
-            </h2>
-            <KeralaMap 
-              onLocationSelect={handleLocationSelect}
-              selectedLocation={selectedLocation}
-            />
-            <div className="mt-4 text-sm text-forest-600 bg-earth-50 p-3 rounded-lg">
-              <p>💡 <strong>How to use:</strong> Click on any marker for quick insights, or click anywhere on the map to analyze that specific location using our AI model.</p>
-            </div>
-          </Card>
-        </div>
-
-        {/* Right: Weather and Map Insights */}
-        <div className="space-y-6 flex flex-col">
-          <WeatherWidget location={selectedLocation?.name || "Kerala"} />
-          <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 w-full">
-            <div className="text-center">
-              <MapPin className="h-8 w-8 text-forest-600 mx-auto mb-2" />
-              <h3 className="font-semibold text-forest-800 mb-2">Map Insights</h3>
-              <p className="text-sm text-forest-600 mb-4">
-                {selectedLocation 
-                  ? `Analyzing ${selectedLocation.name}` 
-                  : "Select a location to view detailed insights"
-                }
-              </p>
-              {selectedLocation && (
-                <div className="space-y-4">
-                  {/* Best Crop */}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2">
-                      <Leaf className="h-4 w-4 text-green-600" />
-                      Best Crop:
-                    </span>
-                    <Badge className="bg-green-500 text-white">{selectedLocation.bestCrop}</Badge>
-                  </div>
-                  {/* Yield Potential & Confidence */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-white/60 rounded p-2 flex flex-col items-center">
-                      <span className="text-xs text-forest-700">Yield Potential</span>
-                      <span className="font-bold text-lg text-forest-800">{selectedLocation.yieldPotential.toFixed(0)}%</span>
-                    </div>
-                    <div className="bg-white/60 rounded p-2 flex flex-col items-center">
-                      <span className="text-xs text-forest-700">Confidence</span>
-                      <span className="font-bold text-lg text-green-700">{selectedLocation.confidence.toFixed(0)}%</span>
-                    </div>
-                  </div>
-                  {/* Soil, Temp, Rainfall */}
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="flex flex-col items-center">
-                      <span className="text-forest-700">Soil</span>
-                      <span className="font-medium">{selectedLocation.soilType}</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Thermometer className="h-3 w-3 text-red-500 inline mr-1" />
-                      <span>{selectedLocation.temperature.toFixed(1)}°C</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Droplets className="h-3 w-3 text-blue-500 inline mr-1" />
-                      <span>{Math.round(selectedLocation.rainfall)}mm</span>
-                    </div>
-                  </div>
-                  {/* View Full Details Button */}
-                  <Button 
-                    className="w-full mt-2 bg-forest-500 hover:bg-forest-600"
-                    onClick={() => setIsDrawerOpen(true)}
-                  >
-                    View Full Details
-                  </Button>
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <MapPin className="w-5 h-5 text-white" />
                 </div>
-              )}
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-1">Search & Explore Locations</h2>
+                  <p className="text-gray-600 text-sm">Find the best crops for any place in Kerala.</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <LocationSearch onLocationSelect={handleLocationSelect} placeholder="Search by city, district, or village..." />
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(locationCoordinates).map((location) => (
+                    <button
+                      key={location}
+                      onClick={() => handleQuickLocationClick(location)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 ${
+                        activeQuickLocation === location
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {location}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative bg-gradient-to-r from-orange-50 to-amber-100 border border-amber-200/60 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-400 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold mb-1 text-amber-800 text-sm">💡 Smart Discovery</p>
+                    <p className="text-amber-700 text-sm leading-relaxed">
+                      Click anywhere on the map or search a specific location to get instant crop recommendations.
+                    </p>
+                  </div>
+                </div>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse opacity-60"></div>
+              </div>
             </div>
           </Card>
+
+          <Card className="p-6 bg-white/80 backdrop-blur-sm">
+            <h2 className="text-xl font-semibold text-forest-800 mb-4">Interactive Kerala Map</h2>
+            <KeralaMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
+          </Card>
+        </div>
+
+        {/* Right Panel */}
+        <div className="space-y-6 flex flex-col">
+          <WeatherWidget location={selectedLocation?.name || 'Kerala'} />
+          {selectedLocation && (
+            <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 w-full">
+              <div className="text-center space-y-4">
+                <MapPin className="h-8 w-8 text-forest-600 mx-auto" />
+                <h3 className="font-semibold text-forest-800">Analyzing {selectedLocation.name}</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-left">
+                    <p className="text-gray-600">Best Crop</p>
+                    <p className="font-bold text-forest-800">{selectedLocation.bestCrop}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-gray-600">Soil Type</p>
+                    <p className="font-bold text-forest-800">{selectedLocation.soilType}</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-gray-600">Temperature</p>
+                    <p className="font-bold text-forest-800">{selectedLocation.temperature.toFixed(1)}°C</p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-gray-600">Rainfall</p>
+                    <p className="font-bold text-forest-800">{Math.round(selectedLocation.rainfall)} mm</p>
+                  </div>
+                  <div className="text-left col-span-2">
+                    <p className="text-gray-600">Yield Potential</p>
+                    <p className="font-bold text-forest-800">{selectedLocation.yieldPotential.toFixed(1)}%</p>
+                  </div>
+                </div>
+                <Button onClick={() => setIsDrawerOpen(true)} className="w-full mt-2 bg-forest-600 text-white hover:bg-forest-700">
+                  View Full Details
+                </Button>
+              </div>
+            </Card>
+          )}
         </div>
       </div>
 
-      {/* Quick Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-forest-500 rounded-lg">
-              <Leaf className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-forest-600">Active Regions</p>
-              <p className="text-xl font-bold text-forest-800">14</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-br from-harvest-50 to-harvest-100 border border-harvest-200">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-harvest-500 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-harvest-700">Avg Accuracy</p>
-              <p className="text-xl font-bold text-harvest-800">87%</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-br from-sky-50 to-sky-100 border border-sky-200">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-sky-500 rounded-lg">
-              <Droplets className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-sky-700">Weather Stations</p>
-              <p className="text-xl font-bold text-sky-800">28</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-br from-earth-50 to-earth-100 border border-earth-200">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-earth-500 rounded-lg">
-              <MapPin className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-sm text-earth-700">Data Points</p>
-              <p className="text-xl font-bold text-earth-800">15.2K</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Location Details Drawer */}
       <LocationDetailsDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
