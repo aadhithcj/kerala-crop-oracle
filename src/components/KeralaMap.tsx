@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { MapPin, TrendingUp, Droplets, Thermometer } from 'lucide-react';
+import { MapPin, TrendingUp, Droplets, Thermometer, Leaf } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
