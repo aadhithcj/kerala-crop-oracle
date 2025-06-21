@@ -28,7 +28,7 @@ const Dashboard: React.FC = () => {
 
   const handleLocationSelect = (location: any) => {
     setIsAnalyzing(true);
-    
+
     // Simulate API processing time
     setTimeout(() => {
       if ('bestCrop' in location) {
@@ -51,7 +51,8 @@ const Dashboard: React.FC = () => {
         setSelectedLocation(enrichedLocation);
       }
       setIsAnalyzing(false);
-      setIsDrawerOpen(true);
+      // Remove or comment out the next line:
+      // setIsDrawerOpen(true);
     }, 1500);
   };
 
@@ -132,15 +133,48 @@ const Dashboard: React.FC = () => {
                 }
               </p>
               {selectedLocation && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Best Crop:</span>
-                    <span className="font-medium">{selectedLocation.bestCrop}</span>
+                <div className="space-y-4">
+                  {/* Best Crop */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <Leaf className="h-4 w-4 text-green-600" />
+                      Best Crop:
+                    </span>
+                    <Badge className="bg-green-500 text-white">{selectedLocation.bestCrop}</Badge>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Yield Potential:</span>
-                    <span className="font-medium">{selectedLocation.yieldPotential.toFixed(0)}%</span>
+                  {/* Yield Potential & Confidence */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-white/60 rounded p-2 flex flex-col items-center">
+                      <span className="text-xs text-forest-700">Yield Potential</span>
+                      <span className="font-bold text-lg text-forest-800">{selectedLocation.yieldPotential.toFixed(0)}%</span>
+                    </div>
+                    <div className="bg-white/60 rounded p-2 flex flex-col items-center">
+                      <span className="text-xs text-forest-700">Confidence</span>
+                      <span className="font-bold text-lg text-green-700">{selectedLocation.confidence.toFixed(0)}%</span>
+                    </div>
                   </div>
+                  {/* Soil, Temp, Rainfall */}
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="flex flex-col items-center">
+                      <span className="text-forest-700">Soil</span>
+                      <span className="font-medium">{selectedLocation.soilType}</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <Thermometer className="h-3 w-3 text-red-500 inline mr-1" />
+                      <span>{selectedLocation.temperature.toFixed(1)}°C</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <Droplets className="h-3 w-3 text-blue-500 inline mr-1" />
+                      <span>{Math.round(selectedLocation.rainfall)}mm</span>
+                    </div>
+                  </div>
+                  {/* View Full Details Button */}
+                  <Button 
+                    className="w-full mt-2 bg-forest-500 hover:bg-forest-600"
+                    onClick={() => setIsDrawerOpen(true)}
+                  >
+                    View Full Details
+                  </Button>
                 </div>
               )}
             </div>
