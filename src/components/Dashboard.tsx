@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import KeralaMap from './KeralaMap';
 import LocationSearch from './LocationSearch';
@@ -42,7 +43,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
     Munnar: { lat: 10.0889, lng: 77.0595, district: 'Idukki', name: 'Munnar' }
   };
 
-  const handleLocationSelect = (location: any) => {
+  const handleLocationSelect = (location: any, shouldNavigate: boolean = false) => {
     setIsAnalyzing(true);
     setTimeout(() => {
       const enrichedLocation: LocationData = {
@@ -64,6 +65,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
       }
 
       setIsAnalyzing(false);
+
+      // If shouldNavigate is true (from "Analyze Location" button), navigate to yield prediction
+      if (shouldNavigate && onLocationAnalyzed && onNavigateToTab) {
+        onLocationAnalyzed(enrichedLocation);
+        onNavigateToTab('prediction');
+      }
     }, 1200);
   };
 
@@ -147,7 +154,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
 
           <Card className="p-6 bg-white/80 backdrop-blur-sm">
             <h2 className="text-xl font-semibold text-forest-800 mb-4">Interactive Kerala Map</h2>
-            <KeralaMap onLocationSelect={handleLocationSelect} selectedLocation={selectedLocation} />
+            <KeralaMap 
+              onLocationSelect={(location) => handleLocationSelect(location, false)}
+              onLocationAnalyze={(location) => handleLocationSelect(location, true)}
+              selectedLocation={selectedLocation} 
+            />
           </Card>
         </div>
 
