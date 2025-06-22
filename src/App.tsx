@@ -7,28 +7,55 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import EnhancedBestCropRecommendation from './components/EnhancedBestCropRecommendation';
+import YieldPrediction from './components/YieldPrediction';
 
 const queryClient = new QueryClient();
 
+interface LocationData {
+  lat: number;
+  lng: number;
+  name: string;
+  district: string;
+  bestCrop: string;
+  yieldPotential: number;
+  soilType: string;
+  temperature: number;
+  rainfall: number;
+  confidence: number;
+}
+
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
+
+  const handleLocationAnalyzed = (location: LocationData) => {
+    setSelectedLocation(location);
+  };
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />;
+        return (
+          <Dashboard 
+            onLocationAnalyzed={handleLocationAnalyzed}
+            onNavigateToTab={handleTabChange}
+          />
+        );
       case 'recommendation':
         return <EnhancedBestCropRecommendation />;
       case 'prediction':
-        return (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-forest-600 mx-auto mb-4"></div>
-            <h2 className="text-2xl font-bold text-forest-800 mb-4">Yield Prediction</h2>
-            <p className="text-forest-600">🌱 Growing predictions... Advanced yield prediction tools coming soon!</p>
-          </div>
-        );
+        return <YieldPrediction selectedLocation={selectedLocation} />;
       default:
-        return <Dashboard />;
+        return (
+          <Dashboard 
+            onLocationAnalyzed={handleLocationAnalyzed}
+            onNavigateToTab={handleTabChange}
+          />
+        );
     }
   };
 
@@ -37,7 +64,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+        <Layout activeTab={activeTab} onTabChange={handleTabChange}>
           {renderContent()}
         </Layout>
       </TooltipProvider>

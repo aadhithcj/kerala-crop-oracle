@@ -23,7 +23,12 @@ interface LocationData {
   confidence: number;
 }
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onLocationAnalyzed?: (location: LocationData) => void;
+  onNavigateToTab?: (tab: string) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToTab }) => {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -65,6 +70,13 @@ const Dashboard: React.FC = () => {
   const handleQuickLocationClick = (loc: string) => {
     setActiveQuickLocation(loc);
     handleLocationSelect(locationCoordinates[loc]);
+  };
+
+  const handleViewFullDetails = () => {
+    if (selectedLocation && onLocationAnalyzed && onNavigateToTab) {
+      onLocationAnalyzed(selectedLocation);
+      onNavigateToTab('prediction');
+    }
   };
 
   return (
@@ -169,7 +181,7 @@ const Dashboard: React.FC = () => {
                     <p className="font-bold text-forest-800">{selectedLocation.yieldPotential.toFixed(1)}%</p>
                   </div>
                 </div>
-                <Button onClick={() => setIsDrawerOpen(true)} className="w-full mt-2 bg-forest-600 text-white hover:bg-forest-700">
+                <Button onClick={handleViewFullDetails} className="w-full mt-2 bg-forest-600 text-white hover:bg-forest-700">
                   View Full Details
                 </Button>
               </div>
