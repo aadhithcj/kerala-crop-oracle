@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Leaf, TrendingUp, Droplets, Thermometer, Crown, Filter, MapPin, RefreshCw } from 'lucide-react';
+import { Leaf, TrendingUp, Droplets, Thermometer, Crown, Filter, MapPin, Navigation } from 'lucide-react';
 
 interface CropRecommendation {
   name: string;
@@ -33,11 +32,13 @@ interface LocationData {
 interface EnhancedBestCropRecommendationProps {
   selectedLocation?: LocationData | null;
   onLocationChange?: (location: LocationData | null) => void;
+  onNavigateToTab?: (tab: string) => void;
 }
 
 const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationProps> = ({ 
   selectedLocation, 
-  onLocationChange 
+  onLocationChange,
+  onNavigateToTab 
 }) => {
   const [selectedSeason, setSelectedSeason] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -45,7 +46,7 @@ const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationPro
   const cropRecommendations: CropRecommendation[] = [
     {
       name: 'Coconut',
-      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 92,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 85,
       suitability: 'high',
       season: 'all',
       type: 'cash',
@@ -55,7 +56,7 @@ const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationPro
     },
     {
       name: 'Rice',
-      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 85,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 82,
       suitability: 'high',
       season: 'monsoon',
       type: 'food',
@@ -122,9 +123,9 @@ const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationPro
 
   const optimalCrop = filteredCrops.length > 0 ? getOptimalCrop() : null;
 
-  const handleClearLocation = () => {
-    if (onLocationChange) {
-      onLocationChange(null);
+  const handleChooseDifferentLocation = () => {
+    if (onNavigateToTab) {
+      onNavigateToTab('dashboard');
     }
   };
 
@@ -141,32 +142,36 @@ const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationPro
       </div>
 
       {/* Location Info Card */}
-      {selectedLocation && (
-        <Card className="p-4 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <MapPin className="h-5 w-5 text-blue-600" />
-              <div>
-                <h3 className="font-semibold text-forest-800">
-                  Showing crops for {selectedLocation.name}, {selectedLocation.district}
-                </h3>
-                <p className="text-sm text-forest-600">
-                  Soil: {selectedLocation.soilType} | Temperature: {selectedLocation.temperature.toFixed(1)}°C
-                </p>
-              </div>
+      <Card className="p-4 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <MapPin className="h-5 w-5 text-blue-600" />
+            <div>
+              <h3 className="font-semibold text-forest-800">
+                {selectedLocation 
+                  ? `Showing crops for ${selectedLocation.name}, ${selectedLocation.district}` 
+                  : 'Showing general crops for Kerala'
+                }
+              </h3>
+              <p className="text-sm text-forest-600">
+                {selectedLocation 
+                  ? `Soil: ${selectedLocation.soilType} | Temperature: ${selectedLocation.temperature.toFixed(1)}°C`
+                  : 'General recommendations for Kerala\'s diverse agricultural zones'
+                }
+              </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleClearLocation}
-              className="border-blue-300 text-blue-700 hover:bg-blue-50"
-            >
-              <RefreshCw className="h-4 w-4 mr-1" />
-              Clear Location
-            </Button>
           </div>
-        </Card>
-      )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleChooseDifferentLocation}
+            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+          >
+            <Navigation className="h-4 w-4 mr-1" />
+            {selectedLocation ? 'Choose Different Location' : 'Select Specific Location'}
+          </Button>
+        </div>
+      </Card>
 
       {/* Filters */}
       <Card className="p-6 bg-white/80 backdrop-blur-sm">
@@ -214,7 +219,7 @@ const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationPro
             <div className="flex items-center space-x-2">
               <Crown className="h-6 w-6 text-harvest-600" />
               <h3 className="text-xl font-bold text-green-800">
-                {selectedLocation ? `Best for ${selectedLocation.name}` : 'Most Optimal Choice'}
+                {selectedLocation ? `Best for ${selectedLocation.name}` : 'Most Optimal Choice for Kerala'}
               </h3>
             </div>
             <Badge className="bg-green-500 text-white font-bold text-lg px-4 py-2">
@@ -226,7 +231,10 @@ const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationPro
             <div>
               <h4 className="text-2xl font-bold text-green-800 mb-2">{optimalCrop.name}</h4>
               <p className="text-green-600 mb-4">
-                {selectedLocation ? 'Highest yield potential for this location' : 'Highest yield potential in your selected criteria'}
+                {selectedLocation 
+                  ? 'Highest yield potential for this location' 
+                  : 'Highest yield potential in your selected criteria for Kerala'
+                }
               </p>
               
               <div className="space-y-2">

@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Leaf, TrendingUp, Droplets, Thermometer, AlertCircle, ArrowUpDown, BarChart3 } from 'lucide-react';
+import { MapPin, Leaf, TrendingUp, Droplets, Thermometer, AlertCircle, ArrowUpDown, BarChart3, Navigation } from 'lucide-react';
 
 interface LocationData {
   lat: number;
@@ -57,12 +56,22 @@ const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation, onN
     }
   };
 
+  const handleChooseLocation = () => {
+    if (onNavigateToTab) {
+      onNavigateToTab('dashboard');
+    }
+  };
+
   if (!selectedLocation) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 space-y-6">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-forest-600 mx-auto mb-4"></div>
         <h2 className="text-2xl font-bold text-forest-800 mb-4">Yield Prediction</h2>
-        <p className="text-forest-600">🌱 Select a location from the Dashboard to see detailed yield predictions and crop insights!</p>
+        <p className="text-forest-600 mb-6">🌱 Select a location to see detailed yield predictions and crop insights!</p>
+        <Button onClick={handleChooseLocation} className="bg-forest-500 hover:bg-forest-600">
+          <Navigation className="h-4 w-4 mr-2" />
+          Choose Location from Map
+        </Button>
       </div>
     );
   }
@@ -225,8 +234,9 @@ const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation, onN
             View Seasonal Guide
           </Button>
           
-          <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
-            Market Prices
+          <Button onClick={handleChooseLocation} variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
+            <Navigation className="h-4 w-4 mr-2" />
+            Choose Different Location
           </Button>
         </div>
       </div>

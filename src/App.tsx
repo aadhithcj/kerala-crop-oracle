@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -46,7 +45,13 @@ const App = () => {
           />
         );
       case 'recommendation':
-        return <EnhancedBestCropRecommendation selectedLocation={selectedLocation} onLocationChange={setSelectedLocation} />;
+        return (
+          <EnhancedBestCropRecommendation 
+            selectedLocation={selectedLocation} 
+            onLocationChange={setSelectedLocation}
+            onNavigateToTab={handleTabChange}
+          />
+        );
       case 'prediction':
         return <YieldPrediction selectedLocation={selectedLocation} onNavigateToTab={handleTabChange} />;
       default:
