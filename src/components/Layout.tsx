@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { MapPin, TrendingUp, BarChart3, GitCompare, CloudSun, Leaf } from 'lucide-react';
+import { MapPin, TrendingUp, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -17,8 +16,6 @@ const Layout = ({ children, activeTab, onTabChange }: LayoutProps) => {
     { id: 'dashboard', label: 'Dashboard', icon: MapPin },
     { id: 'recommendation', label: 'Best Crops', icon: Leaf },
     { id: 'prediction', label: 'Yield Prediction', icon: TrendingUp },
-    { id: 'comparison', label: 'Compare Crops', icon: GitCompare },
-    { id: 'weather', label: 'Weather Analysis', icon: CloudSun },
   ];
 
   return (
@@ -69,7 +66,7 @@ const Layout = ({ children, activeTab, onTabChange }: LayoutProps) => {
               className="lg:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              <BarChart3 className="h-5 w-5" />
+              <Leaf className="h-5 w-5" />
             </Button>
           </div>
 
