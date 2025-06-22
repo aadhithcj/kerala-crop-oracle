@@ -27,8 +27,8 @@
     --muted: 236 244 215; /* light earth */
     --muted-foreground: 101 163 13;
 
-    --accent: 245 193 51; /* harvest gold */
-    --accent-foreground: 133 77 14;
+    --accent: 161 124 92; /* earth-tone harvest */
+    --accent-foreground: 250 248 243;
 
     --destructive: 239 68 68;
     --destructive-foreground: 254 242 242;
@@ -59,8 +59,8 @@
     --muted: 22 101 52;
     --muted-foreground: 187 247 208;
 
-    --accent: 245 193 51;
-    --accent-foreground: 133 77 14;
+    --accent: 161 124 92;
+    --accent-foreground: 250 248 243;
 
     --destructive: 220 38 38;
     --destructive-foreground: 254 242 242;

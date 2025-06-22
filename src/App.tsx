@@ -46,9 +46,9 @@ const App = () => {
           />
         );
       case 'recommendation':
-        return <EnhancedBestCropRecommendation />;
+        return <EnhancedBestCropRecommendation selectedLocation={selectedLocation} onLocationChange={setSelectedLocation} />;
       case 'prediction':
-        return <YieldPrediction selectedLocation={selectedLocation} />;
+        return <YieldPrediction selectedLocation={selectedLocation} onNavigateToTab={handleTabChange} />;
       default:
         return (
           <Dashboard 

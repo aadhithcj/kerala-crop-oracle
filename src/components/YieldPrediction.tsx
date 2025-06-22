@@ -20,20 +20,21 @@ interface LocationData {
 
 interface YieldPredictionProps {
   selectedLocation: LocationData | null;
+  onNavigateToTab?: (tab: string) => void;
 }
 
-const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation }) => {
+const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation, onNavigateToTab }) => {
   const getYieldStatus = (yieldValue: number) => {
     if (yieldValue >= 80) return { label: 'Excellent', color: 'bg-green-500', textColor: 'text-green-700', badge: '🟢' };
     if (yieldValue >= 65) return { label: 'Good', color: 'bg-blue-500', textColor: 'text-blue-700', badge: '🟡' };
-    if (yieldValue >= 50) return { label: 'Fair', color: 'bg-yellow-500', textColor: 'text-yellow-700', badge: '🟡' };
+    if (yieldValue >= 50) return { label: 'Fair', color: 'bg-harvest-500', textColor: 'text-harvest-700', badge: '🟡' };
     return { label: 'Poor', color: 'bg-red-500', textColor: 'text-red-700', badge: '🔴' };
   };
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 90) return 'text-green-600';
     if (confidence >= 70) return 'text-blue-600';
-    if (confidence >= 50) return 'text-yellow-600';
+    if (confidence >= 50) return 'text-harvest-600';
     return 'text-red-600';
   };
 
@@ -48,6 +49,12 @@ const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation }) =
       change: change,
       isIncrease: change > 0
     };
+  };
+
+  const handleCompareOtherCrops = () => {
+    if (onNavigateToTab) {
+      onNavigateToTab('recommendation');
+    }
   };
 
   if (!selectedLocation) {
@@ -65,6 +72,7 @@ const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation }) =
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold font-poppins text-forest-800">
           Yield Prediction & Analysis
@@ -208,7 +216,7 @@ const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation }) =
       {/* Action Buttons */}
       <div className="flex justify-center">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl">
-          <Button className="bg-forest-500 hover:bg-forest-600">
+          <Button onClick={handleCompareOtherCrops} className="bg-forest-500 hover:bg-forest-600">
             <BarChart3 className="h-4 w-4 mr-2" />
             Compare Other Crops
           </Button>

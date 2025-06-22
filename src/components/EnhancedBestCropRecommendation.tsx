@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Leaf, TrendingUp, Droplets, Thermometer, Crown, Filter } from 'lucide-react';
+import { Leaf, TrendingUp, Droplets, Thermometer, Crown, Filter, MapPin, RefreshCw } from 'lucide-react';
 
 interface CropRecommendation {
   name: string;
@@ -17,14 +17,35 @@ interface CropRecommendation {
   profitability: number;
 }
 
-const EnhancedBestCropRecommendation: React.FC = () => {
+interface LocationData {
+  lat: number;
+  lng: number;
+  name: string;
+  district: string;
+  bestCrop: string;
+  yieldPotential: number;
+  soilType: string;
+  temperature: number;
+  rainfall: number;
+  confidence: number;
+}
+
+interface EnhancedBestCropRecommendationProps {
+  selectedLocation?: LocationData | null;
+  onLocationChange?: (location: LocationData | null) => void;
+}
+
+const EnhancedBestCropRecommendation: React.FC<EnhancedBestCropRecommendationProps> = ({ 
+  selectedLocation, 
+  onLocationChange 
+}) => {
   const [selectedSeason, setSelectedSeason] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
 
   const cropRecommendations: CropRecommendation[] = [
     {
       name: 'Coconut',
-      yieldPotential: 92,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 92,
       suitability: 'high',
       season: 'all',
       type: 'cash',
@@ -34,7 +55,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
     },
     {
       name: 'Rice',
-      yieldPotential: 85,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 85,
       suitability: 'high',
       season: 'monsoon',
       type: 'food',
@@ -44,7 +65,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
     },
     {
       name: 'Pepper',
-      yieldPotential: 78,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 78,
       suitability: 'medium',
       season: 'monsoon',
       type: 'cash',
@@ -54,7 +75,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
     },
     {
       name: 'Banana',
-      yieldPotential: 72,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 72,
       suitability: 'medium',
       season: 'all',
       type: 'food',
@@ -64,7 +85,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
     },
     {
       name: 'Cardamom',
-      yieldPotential: 68,
+      yieldPotential: selectedLocation ? selectedLocation.yieldPotential + Math.random() * 10 - 5 : 68,
       suitability: 'medium',
       season: 'winter',
       type: 'cash',
@@ -85,7 +106,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
       case 'high':
         return { color: 'bg-green-500', text: 'text-green-700', emoji: '🟢', label: 'High Yield' };
       case 'medium':
-        return { color: 'bg-yellow-500', text: 'text-yellow-700', emoji: '🟡', label: 'Average' };
+        return { color: 'bg-harvest-500', text: 'text-harvest-700', emoji: '🟡', label: 'Average' };
       case 'low':
         return { color: 'bg-red-500', text: 'text-red-700', emoji: '🔴', label: 'Low Yield' };
       default:
@@ -101,6 +122,12 @@ const EnhancedBestCropRecommendation: React.FC = () => {
 
   const optimalCrop = filteredCrops.length > 0 ? getOptimalCrop() : null;
 
+  const handleClearLocation = () => {
+    if (onLocationChange) {
+      onLocationChange(null);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -112,6 +139,34 @@ const EnhancedBestCropRecommendation: React.FC = () => {
           Get personalized crop recommendations based on season, soil conditions, and market trends.
         </p>
       </div>
+
+      {/* Location Info Card */}
+      {selectedLocation && (
+        <Card className="p-4 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              <div>
+                <h3 className="font-semibold text-forest-800">
+                  Showing crops for {selectedLocation.name}, {selectedLocation.district}
+                </h3>
+                <p className="text-sm text-forest-600">
+                  Soil: {selectedLocation.soilType} | Temperature: {selectedLocation.temperature.toFixed(1)}°C
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleClearLocation}
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" />
+              Clear Location
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card className="p-6 bg-white/80 backdrop-blur-sm">
@@ -157,8 +212,10 @@ const EnhancedBestCropRecommendation: React.FC = () => {
         <Card className="p-6 border-2 border-green-400 bg-gradient-to-br from-green-50 to-green-100 shadow-lg animate-pulse-glow">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <Crown className="h-6 w-6 text-yellow-600" />
-              <h3 className="text-xl font-bold text-green-800">Most Optimal Choice</h3>
+              <Crown className="h-6 w-6 text-harvest-600" />
+              <h3 className="text-xl font-bold text-green-800">
+                {selectedLocation ? `Best for ${selectedLocation.name}` : 'Most Optimal Choice'}
+              </h3>
             </div>
             <Badge className="bg-green-500 text-white font-bold text-lg px-4 py-2">
               🟢 BEST
@@ -168,12 +225,14 @@ const EnhancedBestCropRecommendation: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h4 className="text-2xl font-bold text-green-800 mb-2">{optimalCrop.name}</h4>
-              <p className="text-green-600 mb-4">Highest yield potential in your selected criteria</p>
+              <p className="text-green-600 mb-4">
+                {selectedLocation ? 'Highest yield potential for this location' : 'Highest yield potential in your selected criteria'}
+              </p>
               
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-green-700">Yield Potential:</span>
-                  <span className="font-bold text-green-800">{optimalCrop.yieldPotential}%</span>
+                  <span className="font-bold text-green-800">{Math.round(optimalCrop.yieldPotential)}%</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700">Profitability:</span>
@@ -191,7 +250,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
                 <Droplets className="h-4 w-4 text-blue-500" />
                 <span className="text-sm">Water: {optimalCrop.waterRequirement}</span>
               </div>
-              <Badge className={`${optimalCrop.type === 'cash' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>
+              <Badge className={`${optimalCrop.type === 'cash' ? 'bg-harvest-100 text-harvest-800' : 'bg-blue-100 text-blue-800'}`}>
                 {optimalCrop.type === 'cash' ? '💰 Cash Crop' : '🌾 Food Crop'}
               </Badge>
             </div>
@@ -217,7 +276,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
                   <Leaf className="h-5 w-5 text-forest-600" />
                   <h3 className="text-lg font-semibold text-forest-800">{crop.name}</h3>
                 </div>
-                {isOptimal && <Crown className="h-5 w-5 text-yellow-600" />}
+                {isOptimal && <Crown className="h-5 w-5 text-harvest-600" />}
               </div>
 
               <div className="space-y-4">
@@ -231,12 +290,12 @@ const EnhancedBestCropRecommendation: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-forest-700">Yield Potential</span>
-                    <span className="font-medium text-forest-800">{crop.yieldPotential}%</span>
+                    <span className="font-medium text-forest-800">{Math.round(crop.yieldPotential)}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full ${suitability.color}`}
-                      style={{ width: `${crop.yieldPotential}%` }}
+                      style={{ width: `${Math.min(crop.yieldPotential, 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -253,7 +312,7 @@ const EnhancedBestCropRecommendation: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-forest-100">
-                  <Badge variant="outline" className={`${crop.type === 'cash' ? 'border-yellow-300 text-yellow-700' : 'border-blue-300 text-blue-700'}`}>
+                  <Badge variant="outline" className={`${crop.type === 'cash' ? 'border-harvest-300 text-harvest-700' : 'border-blue-300 text-blue-700'}`}>
                     {crop.type === 'cash' ? '💰 Cash' : '🌾 Food'}
                   </Badge>
                   <Badge variant="outline" className="border-forest-300 text-forest-700">
