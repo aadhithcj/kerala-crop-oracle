@@ -19,14 +19,13 @@ def load_model_and_data():
     global model, district_avg_scores, feature_columns
     
     try:
-        # Load your trained model (update path as needed)
-        # model = pickle.load(open('your_model.pkl', 'rb'))
+        # Load your trained model
+        model_path = os.path.join(os.path.dirname(__file__), 'model.pkl')
+        model = pickle.load(open(model_path, 'rb'))
+        print("Model loaded successfully from model.pkl")
         
-        # For now, we'll simulate the model loading
-        # Replace this with your actual model loading code
-        print("Model loaded successfully")
-        
-        # Simulate district average scores (replace with your actual data)
+        # You'll need to replace these with your actual training data values
+        # For now, using reasonable estimates - update these with your actual district_avg_scores
         district_avg_scores = {
             'district_ernakulam': 85,
             'district_kozhikode': 82,
@@ -42,7 +41,8 @@ def load_model_and_data():
             'district_wayanad': 74,
         }
         
-        # Define feature columns (replace with your actual feature columns)
+        # Define feature columns (update this with your actual Xtrain.columns)
+        # This should match the columns your model was trained on
         feature_columns = [
             'year', 'rainfall', 'monsoon', 'score',
             'district_ernakulam', 'district_idukki', 'district_kannur',
@@ -53,6 +53,7 @@ def load_model_and_data():
         
     except Exception as e:
         print(f"Error loading model: {e}")
+        print("Make sure model.pkl is in the flask_backend directory")
 
 def get_district_key(district_name):
     """Convert district name to district key format"""
@@ -76,6 +77,7 @@ def get_district_key(district_name):
 def predict_crop():
     try:
         data = request.json
+        print(f"Received prediction request: {data}")
         
         # Extract input data
         lat = data.get('lat', 10.0)
@@ -85,7 +87,7 @@ def predict_crop():
         temperature = data.get('temperature', 28)
         year = data.get('year', 2024)
         
-        # Create input data structure similar to your Python code
+        # Create input data structure exactly like your Python code
         inputdata = {
             'year': year,
             'rainfall': rainfall,
@@ -97,7 +99,7 @@ def predict_crop():
             if col.startswith('district_'):
                 inputdata[col] = 0
         
-        # Set the specific district to 1
+        # Set the specific district to 1 and get its score
         district_key = get_district_key(district)
         if district_key in inputdata:
             inputdata[district_key] = 1
@@ -105,7 +107,7 @@ def predict_crop():
         else:
             inputdata['score'] = 75  # Default score
         
-        # Fill missing columns with 0
+        # Fill missing columns with 0 (exactly like your code)
         for col in feature_columns:
             if col not in inputdata:
                 inputdata[col] = 0
@@ -114,26 +116,16 @@ def predict_crop():
         input_df = pd.DataFrame([inputdata])
         input_df = input_df[feature_columns]
         
-        # Make prediction (replace with your actual model prediction)
-        # prediction = model.predict(input_df)[0]
+        print(f"Input data for prediction: {inputdata}")
         
-        # For now, simulate prediction based on district and conditions
-        crop_predictions = {
-            'Ernakulam': 'Rice',
-            'Kozhikode': 'Coconut',
-            'Thiruvananthapuram': 'Banana',
-            'Thrissur': 'Pepper',
-            'Kannur': 'Cashew',
-            'Idukki': 'Cardamom',
-            'Kollam': 'Coconut',
-            'Kottayam': 'Rice',
-            'Malappuram': 'Coconut',
-            'Palakkad': 'Rice',
-            'Pathanamthitta': 'Pepper',
-            'Wayanad': 'Coffee',
-        }
-        
-        prediction = crop_predictions.get(district, 'Rice')
+        # Make prediction using your loaded model
+        if model is not None:
+            prediction = model.predict(input_df)[0]
+            print(f"Model prediction: {prediction}")
+        else:
+            # Fallback if model isn't loaded
+            prediction = 'Rice'
+            print("Model not loaded, using fallback prediction")
         
         # Calculate confidence and yield potential based on conditions
         base_confidence = district_avg_scores.get(district_key, 75)
@@ -167,6 +159,7 @@ def predict_crop():
             'rainfall': rainfall
         }
         
+        print(f"Sending response: {response}")
         return jsonify(response)
         
     except Exception as e:
@@ -183,8 +176,13 @@ def predict_crop():
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy', 'message': 'Flask API is running'})
+    return jsonify({
+        'status': 'healthy', 
+        'message': 'Flask API is running',
+        'model_loaded': model is not None
+    })
 
 if __name__ == '__main__':
     load_model_and_data()
+    print("Starting Flask server...")
     app.run(debug=True, host='0.0.0.0', port=5000)
