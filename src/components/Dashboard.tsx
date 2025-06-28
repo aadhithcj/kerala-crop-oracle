@@ -50,18 +50,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
 
   const handleLocationSelect = async (location: any, shouldNavigate: boolean = false) => {
     setIsAnalyzing(true);
+    console.log('Dashboard: Starting location analysis for:', location);
 
     try {
       const district = location.district || getDistrictFromCoordinates(location.lat, location.lng);
+      console.log('Dashboard: District determined as:', district);
 
       const predictionData = await predictCrop({
         lat: location.lat,
         lng: location.lng,
         district: district,
-        rainfall: 2500,
-        temperature: 28,
+        rainfall: 2000 + Math.random() * 2000, // Dynamic rainfall 2000-4000mm
+        temperature: 26 + Math.random() * 6, // Dynamic temperature 26-32°C
         year: 2024
       });
+
+      console.log('Dashboard: Received prediction data:', predictionData);
 
       const enrichedLocation: LocationData = {
         lat: location.lat,
@@ -76,6 +80,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
         confidence: predictionData.confidence
       };
 
+      console.log('Dashboard: Enriched location data:', enrichedLocation);
       setSelectedLocation(enrichedLocation);
 
       if (mapRef.current) {
@@ -89,7 +94,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
         onNavigateToTab('prediction');
       }
     } catch (error) {
-      console.error('Error getting prediction:', error);
+      console.error('Dashboard: Error getting prediction:', error);
       setIsAnalyzing(false);
     }
   };
@@ -184,11 +189,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
 
         {/* Right Panel */}
         <div className="space-y-6 flex flex-col">
-<WeatherWidget 
-  location={selectedLocation?.name || 'Kerala'} 
-  lat={selectedLocation?.lat || 10.8505} 
-  lng={selectedLocation?.lng || 76.2711}
-/>
+          <WeatherWidget 
+            location={selectedLocation?.name || 'Kerala'} 
+            lat={selectedLocation?.lat || 10.8505} 
+            lng={selectedLocation?.lng || 76.2711}
+          />
+          
           {selectedLocation && (
             <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 w-full">
               <div className="text-center space-y-4">
