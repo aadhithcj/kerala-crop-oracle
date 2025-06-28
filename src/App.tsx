@@ -10,7 +10,7 @@ import YieldPrediction from './components/YieldPrediction';
 
 const queryClient = new QueryClient();
 
-interface LocationData {
+export interface LocationData {
   lat: number;
   lng: number;
   name: string;
@@ -53,7 +53,12 @@ const App = () => {
           />
         );
       case 'prediction':
-        return <YieldPrediction selectedLocation={selectedLocation} onNavigateToTab={handleTabChange} />;
+        return (
+          <YieldPrediction 
+            selectedLocation={selectedLocation} 
+            onNavigateToTab={handleTabChange} 
+          />
+        );
       default:
         return (
           <Dashboard 

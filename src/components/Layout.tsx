@@ -1,3 +1,4 @@
+// src/components/Layout.tsx
 import React, { useState } from 'react';
 import { MapPin, TrendingUp, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,6 @@ const Layout = ({ children, activeTab, onTabChange }: LayoutProps) => {
 
   return (
     <div className="min-h-screen agricultural-gradient">
-      {/* Header */}
       <header className="bg-white/90 backdrop-blur-sm border-b border-earth-200 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -59,7 +59,7 @@ const Layout = ({ children, activeTab, onTabChange }: LayoutProps) => {
               })}
             </nav>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile */}
             <Button
               variant="ghost"
               size="sm"
@@ -100,12 +100,8 @@ const Layout = ({ children, activeTab, onTabChange }: LayoutProps) => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {children}
-      </main>
+      <main className="container mx-auto px-4 py-6">{children}</main>
 
-      {/* Footer */}
       <footer className="bg-forest-800 text-white py-6 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-forest-200">

@@ -5,10 +5,7 @@ import WeatherWidget from './WeatherWidget';
 import LocationDetailsDrawer from './LocationDetailsDrawer';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  TrendingUp, Leaf, Droplets, Thermometer, MapPin, Sparkles
-} from 'lucide-react';
+import { MapPin, Sparkles } from 'lucide-react';
 import { predictCrop, getDistrictFromCoordinates } from '@/services/api';
 
 interface LocationData {
@@ -29,6 +26,14 @@ interface DashboardProps {
   onNavigateToTab?: (tab: string) => void;
 }
 
+// ✅ Fix: Define DataRow component properly
+const DataRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <div className="text-left">
+    <p className="text-gray-600 text-xs">{label}</p>
+    <p className="font-bold text-forest-800">{children}</p>
+  </div>
+);
+
 const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToTab }) => {
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -45,10 +50,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
 
   const handleLocationSelect = async (location: any, shouldNavigate: boolean = false) => {
     setIsAnalyzing(true);
-    
+
     try {
       const district = location.district || getDistrictFromCoordinates(location.lat, location.lng);
-      
+
       const predictionData = await predictCrop({
         lat: location.lat,
         lng: location.lng,
@@ -70,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
         rainfall: predictionData.rainfall,
         confidence: predictionData.confidence
       };
-      
+
       setSelectedLocation(enrichedLocation);
 
       if (mapRef.current) {
@@ -179,33 +184,23 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
 
         {/* Right Panel */}
         <div className="space-y-6 flex flex-col">
-          <WeatherWidget location={selectedLocation?.name || 'Kerala'} />
+<WeatherWidget 
+  location={selectedLocation?.name || 'Kerala'} 
+  lat={selectedLocation?.lat || 10.8505} 
+  lng={selectedLocation?.lng || 76.2711}
+/>
           {selectedLocation && (
             <Card className="p-4 bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 w-full">
               <div className="text-center space-y-4">
                 <MapPin className="h-8 w-8 text-forest-600 mx-auto" />
                 <h3 className="font-semibold text-forest-800">Analyzing {selectedLocation.name}</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="text-left">
-                    <p className="text-gray-600">Best Crop</p>
-                    <p className="font-bold text-forest-800">{selectedLocation.bestCrop}</p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-gray-600">Soil Type</p>
-                    <p className="font-bold text-forest-800">{selectedLocation.soilType}</p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-gray-600">Temperature</p>
-                    <p className="font-bold text-forest-800">{selectedLocation.temperature.toFixed(1)}°C</p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-gray-600">Rainfall</p>
-                    <p className="font-bold text-forest-800">{Math.round(selectedLocation.rainfall)} mm</p>
-                  </div>
-                  <div className="text-left col-span-2">
-                    <p className="text-gray-600">Yield Potential</p>
-                    <p className="font-bold text-forest-800">{selectedLocation.yieldPotential.toFixed(1)}%</p>
-                  </div>
+                  <DataRow label="Best Crop">{selectedLocation.bestCrop}</DataRow>
+                  <DataRow label="Soil Type">{selectedLocation.soilType}</DataRow>
+                  <DataRow label="Temp">{selectedLocation.temperature.toFixed(1)}°C</DataRow>
+                  <DataRow label="Rainfall">{Math.round(selectedLocation.rainfall)} mm</DataRow>
+                  <DataRow label="Yield Potential">{selectedLocation.yieldPotential.toFixed(1)}%</DataRow>
+                  <DataRow label="Confidence">{selectedLocation.confidence}%</DataRow>
                 </div>
                 <Button onClick={handleViewFullDetails} className="w-full mt-2 bg-forest-600 text-white hover:bg-forest-700">
                   View Full Details

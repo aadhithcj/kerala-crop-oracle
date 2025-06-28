@@ -101,3 +101,18 @@ export const getDistrictFromCoordinates = (lat: number, lng: number): string => 
   if (lat >= 10.5 && lng < 76.0) return 'Palakkad';
   return 'Malappuram';
 };
+
+export async function getCropComparison(district: string) {
+  const res = await fetch(`/api/compare?district=${district}`);
+  return res.json();
+}
+
+export async function getSeasonalGuide(district: string) {
+  const res = await fetch(`/api/seasonal-guide?district=${district}`);
+  return res.json();
+}
+
+export async function getMarketPrices(crop: string) {
+  const res = await fetch(`/api/market-price?crop=${crop}`);
+  return res.json();
+}

@@ -1,16 +1,13 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the agricultural design system. */
-
 @layer base {
   :root {
-    --background: 248 250 245; /* light earth tone */
-    --foreground: 57 67 41; /* dark forest green */
+    --background: 248 250 245;
+    --foreground: 57 67 41;
 
     --card: 255 255 255;
     --card-foreground: 57 67 41;
@@ -18,16 +15,16 @@
     --popover: 255 255 255;
     --popover-foreground: 57 67 41;
 
-    --primary: 52 158 99; /* forest green */
+    --primary: 52 158 99;
     --primary-foreground: 240 253 244;
 
-    --secondary: 220 252 231; /* light forest */
+    --secondary: 220 252 231;
     --secondary-foreground: 34 197 94;
 
-    --muted: 236 244 215; /* light earth */
+    --muted: 236 244 215;
     --muted-foreground: 101 163 13;
 
-    --accent: 161 124 92; /* earth-tone harvest */
+    --accent: 161 124 92;
     --accent-foreground: 250 248 243;
 
     --destructive: 239 68 68;
@@ -69,9 +66,7 @@
     --input: 21 67 33;
     --ring: 34 197 94;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -95,9 +90,9 @@
 
 @layer components {
   .agricultural-gradient {
-    background: linear-gradient(135deg, 
-      theme('colors.forest.50') 0%, 
-      theme('colors.earth.100') 50%, 
+    background: linear-gradient(135deg,
+      theme('colors.forest.50') 0%,
+      theme('colors.earth.100') 50%,
       theme('colors.sky.50') 100%);
   }
 
@@ -111,5 +106,17 @@
 
   .prediction-card {
     @apply bg-gradient-to-br from-forest-50 to-forest-100 border border-forest-200 rounded-xl p-6 shadow-md;
+  }
+
+  .section-heading {
+    @apply text-xl font-semibold text-forest-800 mb-2;
+  }
+
+  .label {
+    @apply text-sm text-forest-600;
+  }
+
+  .value {
+    @apply text-lg font-bold text-forest-800;
   }
 }
