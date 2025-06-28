@@ -12,8 +12,9 @@ import L from 'leaflet';
 import { MapPin, TrendingUp, Droplets, Thermometer, Leaf } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { predictCrop, getDistrictFromCoordinates } from '@/services/api';
 import 'leaflet/dist/leaflet.css';
-import './KeralaMap.css'; // For zoom button styles if needed
+import './KeralaMap.css';
 
 // Fix marker icons in React Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -45,7 +46,7 @@ interface KeralaMapProps {
   selectedLocation?: LocationData | null;
 }
 
-// Sample data
+// Sample locations with static data for map markers
 const sampleLocations: LocationData[] = [
   {
     lat: 11.2588,
@@ -122,6 +123,7 @@ const KeralaMap = forwardRef(({ onLocationSelect, onLocationAnalyze, selectedLoc
   const [clickedLocation, setClickedLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
   const keralaCenter: [number, number] = [10.8505, 76.2711];
   const mapRef = useRef<any>(null);
 
@@ -139,33 +141,105 @@ const KeralaMap = forwardRef(({ onLocationSelect, onLocationAnalyze, selectedLoc
     return null;
   };
 
-  const handleMapClick = (lat: number, lng: number) => {
+  const handleMapClick = async (lat: number, lng: number) => {
     setClickedLocation({ lat, lng });
+    setIsLoading(true);
 
-    const nearest = sampleLocations.reduce((a, b) => {
-      const da = Math.hypot(a.lat - lat, a.lng - lng);
-      const db = Math.hypot(b.lat - lat, b.lng - lng);
-      return da < db ? a : b;
-    });
+    try {
+      const district = getDistrictFromCoordinates(lat, lng);
+      
+      const predictionData = await predictCrop({
+        lat,
+        lng,
+        district,
+        rainfall: 2500,
+        temperature: 28,
+        year: 2024
+      });
 
-    const locationData: LocationData = {
-      lat,
-      lng,
-      name: `Location ${lat.toFixed(3)}, ${lng.toFixed(3)}`,
-      district: nearest.district,
-      bestCrop: nearest.bestCrop,
-      yieldPotential: Math.max(50, nearest.yieldPotential + (Math.random() - 0.5) * 20),
-      soilType: nearest.soilType,
-      temperature: nearest.temperature + (Math.random() - 0.5) * 4,
-      rainfall: nearest.rainfall + (Math.random() - 0.5) * 500,
-      confidence: Math.max(60, 95 - Math.random() * 25)
-    };
+      const locationData: LocationData = {
+        lat,
+        lng,
+        name: `${district} Location`,
+        district,
+        bestCrop: predictionData.bestCrop,
+        yieldPotential: predictionData.yieldPotential,
+        soilType: predictionData.soilType,
+        temperature: predictionData.temperature,
+        rainfall: predictionData.rainfall,
+        confidence: predictionData.confidence
+      };
 
-    onLocationSelect(locationData);
+      onLocationSelect(locationData);
+    } catch (error) {
+      console.error('Error getting prediction for clicked location:', error);
+      // Fallback to basic data
+      const district = getDistrictFromCoordinates(lat, lng);
+      const locationData: LocationData = {
+        lat,
+        lng,
+        name: `${district} Location`,
+        district,
+        bestCrop: 'Rice',
+        yieldPotential: 70,
+        soilType: 'Laterite',
+        temperature: 28,
+        rainfall: 2500,
+        confidence: 75
+      };
+      onLocationSelect(locationData);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAnalyzeLocation = async (location: any) => {
+    setIsLoading(true);
+    
+    try {
+      const district = location.district || getDistrictFromCoordinates(location.lat, location.lng);
+      
+      const predictionData = await predictCrop({
+        lat: location.lat,
+        lng: location.lng,
+        district,
+        rainfall: location.rainfall || 2500,
+        temperature: location.temperature || 28,
+        year: 2024
+      });
+
+      const enrichedLocation: LocationData = {
+        ...location,
+        district,
+        bestCrop: predictionData.bestCrop,
+        yieldPotential: predictionData.yieldPotential,
+        soilType: predictionData.soilType,
+        temperature: predictionData.temperature,
+        rainfall: predictionData.rainfall,
+        confidence: predictionData.confidence
+      };
+
+      if (onLocationAnalyze) {
+        onLocationAnalyze(enrichedLocation);
+      }
+    } catch (error) {
+      console.error('Error analyzing location:', error);
+      if (onLocationAnalyze) {
+        onLocationAnalyze(location);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="relative w-full h-[500px] rounded-xl overflow-hidden shadow-lg">
+      {isLoading && (
+        <div className="absolute top-4 right-4 z-[1001] bg-white/90 backdrop-blur-sm rounded-lg p-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-forest-600"></div>
+        </div>
+      )}
+      
       <MapContainer
         center={keralaCenter}
         zoom={8}
@@ -222,9 +296,10 @@ const KeralaMap = forwardRef(({ onLocationSelect, onLocationAnalyze, selectedLoc
                   <Button
                     size="sm"
                     className="bg-forest-500 hover:bg-forest-600 text-xs"
-                    onClick={() => onLocationAnalyze && onLocationAnalyze(location)}
+                    onClick={() => handleAnalyzeLocation(location)}
+                    disabled={isLoading}
                   >
-                    Analyze Location
+                    {isLoading ? 'Analyzing...' : 'Analyze Location'}
                   </Button>
                 </div>
               </div>
@@ -245,17 +320,10 @@ const KeralaMap = forwardRef(({ onLocationSelect, onLocationAnalyze, selectedLoc
                 <Button
                   size="sm"
                   className="w-full mt-2 bg-forest-500 hover:bg-forest-600"
-                  onClick={() => {
-                    const locationData = {
-                      lat: clickedLocation.lat,
-                      lng: clickedLocation.lng,
-                      name: `Location ${clickedLocation.lat.toFixed(3)}, ${clickedLocation.lng.toFixed(3)}`,
-                      district: 'Custom Location'
-                    };
-                    onLocationAnalyze && onLocationAnalyze(locationData);
-                  }}
+                  onClick={() => handleAnalyzeLocation(clickedLocation)}
+                  disabled={isLoading}
                 >
-                  Analyze Location
+                  {isLoading ? 'Analyzing...' : 'Analyze Location'}
                 </Button>
               </div>
             </Popup>

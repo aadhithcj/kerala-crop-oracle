@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,9 @@ const YieldPrediction: React.FC<YieldPredictionProps> = ({ selectedLocation, onN
   const getYieldComparison = () => {
     if (!selectedLocation) return null;
     const currentYield = selectedLocation.yieldPotential;
-    const lastYearYield = currentYield + (Math.random() - 0.5) * 20;
+    // Use confidence to simulate last year's data more realistically
+    const variation = (100 - selectedLocation.confidence) / 10; // Higher confidence = less variation
+    const lastYearYield = currentYield + (Math.random() - 0.5) * variation;
     const change = currentYield - lastYearYield;
     return {
       current: currentYield,

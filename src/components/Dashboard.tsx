@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import KeralaMap from './KeralaMap';
 import LocationSearch from './LocationSearch';
@@ -10,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   TrendingUp, Leaf, Droplets, Thermometer, MapPin, Sparkles
 } from 'lucide-react';
+import { predictCrop, getDistrictFromCoordinates } from '@/services/api';
 
 interface LocationData {
   lat: number;
@@ -43,21 +43,34 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
     Munnar: { lat: 10.0889, lng: 77.0595, district: 'Idukki', name: 'Munnar' }
   };
 
-  const handleLocationSelect = (location: any, shouldNavigate: boolean = false) => {
+  const handleLocationSelect = async (location: any, shouldNavigate: boolean = false) => {
     setIsAnalyzing(true);
-    setTimeout(() => {
+    
+    try {
+      const district = location.district || getDistrictFromCoordinates(location.lat, location.lng);
+      
+      const predictionData = await predictCrop({
+        lat: location.lat,
+        lng: location.lng,
+        district: district,
+        rainfall: 2500,
+        temperature: 28,
+        year: 2024
+      });
+
       const enrichedLocation: LocationData = {
         lat: location.lat,
         lng: location.lng,
         name: location.name,
-        district: location.district,
-        bestCrop: ['Rice', 'Coconut', 'Banana', 'Pepper', 'Cardamom'][Math.floor(Math.random() * 5)],
-        yieldPotential: 65 + Math.random() * 30,
-        soilType: ['Laterite', 'Alluvial', 'Red Soil', 'Black Soil'][Math.floor(Math.random() * 4)],
-        temperature: 26 + Math.random() * 6,
-        rainfall: 1500 + Math.random() * 2000,
-        confidence: 75 + Math.random() * 20
+        district: district,
+        bestCrop: predictionData.bestCrop,
+        yieldPotential: predictionData.yieldPotential,
+        soilType: predictionData.soilType,
+        temperature: predictionData.temperature,
+        rainfall: predictionData.rainfall,
+        confidence: predictionData.confidence
       };
+      
       setSelectedLocation(enrichedLocation);
 
       if (mapRef.current) {
@@ -66,12 +79,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLocationAnalyzed, onNavigateToT
 
       setIsAnalyzing(false);
 
-      // If shouldNavigate is true (from "Analyze Location" button), navigate to yield prediction
       if (shouldNavigate && onLocationAnalyzed && onNavigateToTab) {
         onLocationAnalyzed(enrichedLocation);
         onNavigateToTab('prediction');
       }
-    }, 1200);
+    } catch (error) {
+      console.error('Error getting prediction:', error);
+      setIsAnalyzing(false);
+    }
   };
 
   const handleQuickLocationClick = (loc: string) => {
